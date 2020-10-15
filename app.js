@@ -1,7 +1,7 @@
 const express = require("express"),
   bodyParser = require("body-parser"),
-  stripeSecretKey = require("./config/keys").stripeSecretKey,
-  stripe = require("stripe")(stripeSecretKey),
+  stripeTestKey = require("./config/keys").stripeTestKey,
+  stripe = require("stripe")(stripeTestKey),
   exphbs = require("express-handlebars");
 
 const app = express();
@@ -23,6 +23,24 @@ app.use("/", (req, res) => {
   res.render("index");
 });
 
+app.use("/charge", (req, res) => {
+  stripe.setPublishKey(stripeTestKey);
+  const amount = 2500;
+  stripe.customers
+    .create({
+      email: req.body.stripeEmail,
+      source: req.body.stripeToken,
+    })
+    .then((customer) =>
+      stripe.charges.create({
+        customer: customer.id,
+        description: "Web development ebook",
+        amount,
+        currency: "usd",
+      })
+    )
+    .then((charge) => res.redirect("success"));
+});
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
