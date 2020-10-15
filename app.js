@@ -1,7 +1,8 @@
 const express = require("express"),
   bodyParser = require("body-parser"),
-  stripeTestKey = require("./config/keys").stripeTestKey,
-  stripe = require("stripe")(stripeTestKey),
+  stripe = require("stripe")(
+    "sk_test_51HapQkLHRxYJ6OlKLzuzOdcLz5BKe2XkYqhbxmhczrIBMAA0zXgMW4j7GaF3fqFLMqJpBSSjtBFfIhqrk4aRjaie00rgFGZ2ie"
+  ),
   exphbs = require("express-handlebars");
 
 const app = express();
@@ -19,12 +20,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(`${__dirname}/public`));
 
 // Routers
-app.use("/", (req, res) => {
+app.get("/", (req, res) => {
   res.render("index");
 });
 
-app.use("/charge", (req, res) => {
-  stripe.setPublishKey(stripeTestKey);
+app.post("/charge", (req, res) => {
   const amount = 2500;
   stripe.customers
     .create({
@@ -33,13 +33,15 @@ app.use("/charge", (req, res) => {
     })
     .then((customer) =>
       stripe.charges.create({
+        amount,
         customer: customer.id,
         description: "Web development ebook",
-        amount,
         currency: "usd",
       })
     )
-    .then((charge) => res.redirect("success"));
+  .then((charge) =>
+  res.render("success");
+  // );
 });
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
