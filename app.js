@@ -1,8 +1,7 @@
 const express = require("express"),
   bodyParser = require("body-parser"),
-  stripe = require("stripe")(
-    "sk_test_51HapQkLHRxYJ6OlKLzuzOdcLz5BKe2XkYqhbxmhczrIBMAA0zXgMW4j7GaF3fqFLMqJpBSSjtBFfIhqrk4aRjaie00rgFGZ2ie"
-  ),
+  keys = require("./config/keys"),
+  stripe = require("stripe")(keys.stripeSecretKey),
   exphbs = require("express-handlebars");
 
 const app = express();
@@ -21,7 +20,9 @@ app.use(express.static(`${__dirname}/public`));
 
 // Routers
 app.get("/", (req, res) => {
-  res.render("index");
+  res.render("index", {
+    stripePublishableKey: keys.stripePublishableKey,
+  });
 });
 
 app.post("/charge", (req, res) => {
@@ -39,9 +40,7 @@ app.post("/charge", (req, res) => {
         currency: "usd",
       })
     )
-  .then((charge) =>
-  res.render("success");
-  // );
+    .then((charge) => res.render("success"));
 });
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
