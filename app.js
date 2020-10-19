@@ -32,15 +32,18 @@ app.post("/charge", (req, res) => {
       email: req.body.stripeEmail,
       source: req.body.stripeToken,
     })
-    .then((customer) =>
+    .then((customer) => {
       stripe.charges.create({
-        amount,
+        amount: amount,
         customer: customer.id,
         description: "Web development ebook",
         currency: "usd",
-      })
-    )
-    .then((charge) => res.render("success"));
+      });
+    })
+    .then((charge) => res.render("success"))
+    .catch((err) => {
+      throw err;
+    });
 });
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
