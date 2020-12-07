@@ -25,8 +25,15 @@ app.get("/", (req, res) => {
   });
 });
 
-app.post("/charge", (req, res) => {
-  const amount = 2500;
+app.post("/charge", async (req, res) => {
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: 2500,
+    currency: "usd",
+    payment_method_types: ["card"],
+    customer: customer.id,
+    description: "Web development ebook",
+  });
+  res.json({ client_secret: intent.client_secret });
   stripe.customers
     .create({
       email: req.body.stripeEmail,
@@ -34,10 +41,7 @@ app.post("/charge", (req, res) => {
     })
     .then((customer) => {
       stripe.charges.create({
-        amount: amount,
-        customer: customer.id,
-        description: "Web development ebook",
-        currency: "usd",
+        paymentIntent,
       });
     })
     .then((charge) => res.render("success"))
